@@ -58,11 +58,11 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     
-    environment:
-      CLIENT_ID:${{secrets.CLIENT_ID}}
-      CLIENT_SECRET:${{secrets.CLIENT_SECRET}}
-      SUBSCRIPTION_ID:${{secrets.SUB_ID}}
-      TENANT_ID:${{secrets.TENANT_ID}}
+    env:
+      CLIENT_ID: ${{secrets.CLIENT_ID}}
+      CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
+      SUBSCRIPTION_ID: ${{secrets.SUB_ID}}
+      TENANT_ID: ${{secrets.TENANT_ID}}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
