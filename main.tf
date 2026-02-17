@@ -14,6 +14,6 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "name" {
-  name     = "RG2"
+  name     = "RG1"
   location = "South India"
 }
