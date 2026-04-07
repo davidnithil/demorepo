@@ -18,7 +18,7 @@ resource "azurerm_resource_group" "name" {
   location = "South India"
 }
 
-resource "azurerm_resource_group" "name" {
+resource "azurerm_resource_group" "dev" {
   name     = "RG3"
   location = "South India"
 }
