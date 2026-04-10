@@ -1,24 +1,47 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-      version = "=4.1.0"
-    }
+//Create a resource group
+resource "azurerm_resource_group" "rg" {
+  name      = var.rg_name
+  location  = var.location["emea"]
+}
+
+// Create a virtual network within the resource group
+resource "azurerm_virtual_network" "vnet" {
+  count               = length(var.cidr_range)
+  name                = format("%s%s", "vnet-", (count.index+1))
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  address_space       = [var.cidr_range[count.index]]
+}
+
+resource "azurerm_subnet" "subnet" {
+  for_each             = var.subnet_map
+  name                 = each.key
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet[0].name
+  address_prefixes     = [each.value]
+}
+
+resource "azurerm_network_interface" "nics" {
+  for_each = {for nic in var.nic_list: nic.nic_name => nic}
+  name                = each.value.nic_name
+  location            = azurerm_resource_group.rg.location 
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet["app_sub"].id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = each.value.nic_ip
   }
 }
 
-provider "azurerm" {
-  features {}
-  subscription_id = "c5f5a19b-5362-4e10-90c4-887f964f902b"
-  tenant_id = "24fe11b5-e609-4e3a-83bd-149c3f1451cb"
-}
 
-resource "azurerm_resource_group" "name" {
-  name     = "RG2"
-  location = "South India"
-}
-
-resource "azurerm_resource_group" "dev" {
-  name     = "RG1"
-  location = "South India"
+// create storage account
+resource "azurerm_storage_account" "stg_acc" {
+  count                    = var.strage_check == "create" ? 1 : 0
+  name                     = "daslearning22"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = lookup(var.location, "amer") #Another way to fetch value from a MAP
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
 }
